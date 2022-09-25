@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather forecast</title>
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <h1>Dk Weather (XMLHttpRequest)</h1>
+    <label for="cityDropdown">Select a city:</label>
+    <select name="cityDropdown" id="cityDropdown">
+      <option value="Horsens">Horsens</option>
+      <option value="Aarhus">Aarhus</option>
+      <option value="Copenhagen">Copenhagen</option>
+    </select>
+    <button onclick="update()">Get forecast (XMLHttpRequest)</button>
+    <span id="errorSpan" style="color: red"></span>
+
+    <div class="grid-container">
+      <div class="grid-item">
+        <div class="tableDiv">
+          <br /><label>Next 24 hours:</label> <br />
+          <table id="table">
+            <thead id="thead">
+              <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Unit</th>
+      
+              </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+          </table>
+          </div>
+      </div>
+      <div class="grid-item">
+        <div class="container">
+    
+          <br /><label>Last measurement of each type</label> <br /><textarea
+            id="lastTempMeasurementTextArea"
+            cols="50"
+            rows="10"
+            disabled
+          ></textarea>
+          <textarea
+            id="lastPrecipitationMeasurementTextArea"
+            cols="50"
+            rows="10"
+            disabled
+          ></textarea>
+          <textarea
+            id="lastWindMeasurementTextArea"
+            cols="50"
+            rows="10"
+            disabled
+          ></textarea>
+          <textarea
+            id="lastCloudMeasurementTextArea"
+            cols="50"
+            rows="10"
+            disabled
+          ></textarea>
+        </div>
+      </div>
+      <div class="grid item" id="specs">
+   <label>Minimum temperature:
+    <span style="font-weight: bold"id="minTempSpan">-</span>
+    </label>
+    <br/>
+   <label>Maximum temperature:
+    <span style="font-weight: bold" id="maxTempSpan">-</span>
+    </label>
+    <br/>
+   <label>Total precipitation:
+    <span style="font-weight: bold" id="totalPrecipitationSpan">-</span>
+    </label>
+    <br/>
+  <label>Average wind speed: 
+    <span style="font-weight: bold" id="averageWindSpeed">-</span>
+    </label>
+          <br/>
+            <a href="index_fetch.html">Fetch implementation >></a> 
+          <br/>
+        <a href="../upload/upload.html">Post data to server >></a>
+      </div>
+    </div>
+  </body>
+</html>

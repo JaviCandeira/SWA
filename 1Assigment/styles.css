@@ -15,3 +15,12 @@ textarea {
 #specs{
   margin-right: 150px;
 }
+.spanSp{
+  font-weight: bold;
+}
+.post{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

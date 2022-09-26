@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather forecast</title>
     <script src="index.js"></script>
-    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Dk Weather (XMLHttpRequest)</h1>
+    <h1>Weather Forecast using XMLHttpRequest</h1>
     <label for="cityDropdown">Select a city:</label>
     <select name="cityDropdown" id="cityDropdown">
       <option value="Horsens">Horsens</option>
@@ -17,8 +14,6 @@
       <option value="Copenhagen">Copenhagen</option>
     </select>
     <button onclick="update()">Get forecast (XMLHttpRequest)</button>
-    <span id="errorSpan" style="color: red"></span>
-
     <div class="grid-container">
       <div class="grid-item">
         <div class="tableDiv">
@@ -41,53 +36,52 @@
       </div>
       <div class="grid-item">
         <div class="container">
-    
           <br /><label>Last measurement of each type</label> <br /><textarea
             id="lastTempMeasurementTextArea"
-            cols="50"
-            rows="10"
+            cols="37"
+            rows="7"
             disabled
           ></textarea>
           <textarea
             id="lastPrecipitationMeasurementTextArea"
-            cols="50"
-            rows="10"
+            cols="38"
+            rows="8"
             disabled
           ></textarea>
           <textarea
             id="lastWindMeasurementTextArea"
-            cols="50"
-            rows="10"
+            cols="38"
+            rows="8"
             disabled
           ></textarea>
           <textarea
             id="lastCloudMeasurementTextArea"
-            cols="50"
-            rows="10"
+            cols="38"
+            rows="8"
             disabled
           ></textarea>
         </div>
       </div>
       <div class="grid item" id="specs">
    <label>Minimum temperature:
-    <span style="font-weight: bold"id="minTempSpan">-</span>
+    <span class ="spanSp" id="minTempSpan">-</span>
     </label>
     <br/>
    <label>Maximum temperature:
-    <span style="font-weight: bold" id="maxTempSpan">-</span>
+    <span class ="spanSp" id="maxTempSpan">-</span>
     </label>
     <br/>
    <label>Total precipitation:
-    <span style="font-weight: bold" id="totalPrecipitationSpan">-</span>
+    <span class ="spanSp" id="totalPrecipitationSpan">-</span>
     </label>
     <br/>
   <label>Average wind speed: 
-    <span style="font-weight: bold" id="averageWindSpeed">-</span>
+    <span class ="spanSp" id="averageWindSpeed">-</span>
     </label>
           <br/>
-            <a href="index_fetch.html">Fetch implementation >></a> 
+            <a href="">Fetch Forecast</a> 
           <br/>
-        <a href="../upload/upload.html">Post data to server >></a>
+        <a href="post.html">Post data to server</a>
       </div>
     </div>
   </body>

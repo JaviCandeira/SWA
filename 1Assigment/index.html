@@ -13,7 +13,8 @@
       <option value="Aarhus">Aarhus</option>
       <option value="Copenhagen">Copenhagen</option>
     </select>
-    <button onclick="update()">Get forecast (XMLHttpRequest)</button>
+    <button onclick="updateXMLHttp()">Get forecast (XMLHttpRequest)</button>
+    <button onclick="updateFetch()">Get forecast (Fetch)</button>
     <div class="grid-container">
       <div class="grid-item">
         <div class="tableDiv">
@@ -78,9 +79,6 @@
   <label>Average wind speed: 
     <span class ="spanSp" id="averageWindSpeed">-</span>
     </label>
-          <br/>
-            <a href="">Fetch Forecast</a> 
-          <br/>
         <a href="post.html">Post data to server</a>
       </div>
     </div>

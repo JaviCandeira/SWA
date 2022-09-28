@@ -61,23 +61,21 @@ function createWindDatapoint(type, time, place, value, unit, direction) {
   return { ...dataPoint, getDirection, setDirection };
 }
 
-const update = () => {
-  var method = "fetch";
+const updateXMLHttp = () => {
   var selectedCity = document.getElementById("cityDropdown").value;
-  switch(method) {
-    case "XMLHttprequest":
-      console.log("Using XMLHttprequest!");
-      get24hForecast(selectedCity);
-      getLastMeasurementSet(selectedCity);
-      getHistoricData(selectedCity);
-    case "fetch":
-      console.log("Using Fetch!");
-      get24hForecastFetch(selectedCity);
-      getLastMeasurementSetFetch(selectedCity);
-      getHistoricDataFetch(selectedCity);
-  }
+  console.log("Using XMLHttprequest!");
+  get24hForecast(selectedCity);
+  getLastMeasurementSet(selectedCity);
+  getHistoricData(selectedCity);
 };
 
+const updateFetch = () => {
+  var selectedCity = document.getElementById("cityDropdown").value;
+  console.log("Using Fetch!");
+  get24hForecastFetch(selectedCity);
+  getLastMeasurementSetFetch(selectedCity);
+  getHistoricDataFetch(selectedCity);
+}
 
 
 const get24hForecast = (city) => {
@@ -176,8 +174,8 @@ const getHistoricData = (city) => {
 // Fetch Methods
 
 const get24hForecastFetch = (city) => {
-  const response = await fetch(`http://localhost:8080/forecast/${city}`);
-  var data = await response.json();
+  const response = fetch(`http://localhost:8080/forecast/${city}`);
+  var data = response.json();
   
   //console.log(data);
   //if (response) {
@@ -189,12 +187,12 @@ const get24hForecastFetch = (city) => {
       item => `<tr><td>${item.time}</td><td>${item.type}</td><td>${item.from}</td><td>${item.to}</td><td>${item.unit}</td></tr>`
     ).join("");
 
-  makeTable(JSON.parse(data));
+  makeTable(data);//JSON.parse(data));
 };
 
 const getLastMeasurementSetFetch = (city) => {
-  const response = await fetch(`http://localhost:8080/forecast/${city}`);
-  var data = await response.json();
+  const response = fetch(`http://localhost:8080/forecast/${city}`);
+  var data = response.json();
 
   const l = data.length;
   for (let i = 0; i < 4; i++) {
@@ -220,8 +218,8 @@ const getLastMeasurementSetFetch = (city) => {
 };
 
 const getHistoricDataFetch = (city) => {
-  const response = await fetch(`http://localhost:8080/forecast/${city}`);
-  var data = await response.json();
+  const response = fetch(`http://localhost:8080/forecast/${city}`);
+  var data = response.json();
 
   var maxTemp = data[0].value;
   var minTemp = data[0].value;

@@ -62,12 +62,23 @@ function createWindDatapoint(type, time, place, value, unit, direction) {
 }
 
 const update = () => {
-  console.log("using XMLHttprequest");
+  var method = "fetch";
   var selectedCity = document.getElementById("cityDropdown").value;
+  switch(method) {
+    case "XMLHttprequest":
+      console.log("Using XMLHttprequest!");
+      get24hForecast(selectedCity);
+      getLastMeasurementSet(selectedCity);
+      getHistoricData(selectedCity);
+    case "fetch":
+      console.log("Using Fetch!");
+      await get24hForecastFetch(selectedCity);
+      await getLastMeasurementSetFetch(selectedCity);
+      await getHistoricDataFetch(selectedCity);
+  }
+  
 
-  get24hForecast(selectedCity);
-  getLastMeasurementSet(selectedCity);
-  getHistoricData(selectedCity);
+
 };
 
 
@@ -97,24 +108,24 @@ const getLastMeasurementSet = (city) => {
   xhr.open("GET", `http://localhost:8080/data/${city}`);
   xhr.onload = () => {
     const jsonData = xhr.responseText;
-    var dataPoints = JSON.parse(jsonData);
-    const l = dataPoints.length;
+    var data = JSON.parse(jsonData);
+    const l = data.length;
     for (let i = 0; i < 4; i++) {
-      switch (dataPoints[l - i - 1].type) {
+      switch (data[l - i - 1].type) {
         case "temperature":
           var textArea = document.getElementById("lastTempMeasurementTextArea");
-          textArea.value = JSON.stringify(dataPoints[l - i - 1], null, 3);
+          textArea.value = JSON.stringify(data[l - i - 1], null, 3);
           break;
         case "precipitation":
           var textArea = document.getElementById("lastPrecipitationMeasurementTextArea");
-          textArea.value = JSON.stringify(dataPoints[l - i - 1], null, 3);
+          textArea.value = JSON.stringify(data[l - i - 1], null, 3);
           break;
         case "wind speed":
           var textArea = document.getElementById("lastWindMeasurementTextArea");
-          textArea.value = JSON.stringify(dataPoints[l - i - 1], null, 3);
+          textArea.value = JSON.stringify(data[l - i - 1], null, 3);
         case "cloud coverage":
           var textArea = document.getElementById("lastCloudMeasurementTextArea");
-          textArea.value = JSON.stringify(dataPoints[l - i - 1], null, 3);
+          textArea.value = JSON.stringify(data[l - i - 1], null, 3);
         default:
           break;
       }
@@ -132,23 +143,23 @@ const getHistoricData = (city) => {
   xhr.open("GET", `http://localhost:8080/data/${city}`);
   xhr.onload = () => {
     const jsonData = xhr.responseText;
-    var dataPoints = JSON.parse(jsonData);
-    var maxTemp = dataPoints[0].value;
-    var minTemp = dataPoints[0].value;
+    var data = JSON.parse(jsonData);
+    var maxTemp = data[0].value;
+    var minTemp = data[0].value;
     var totalPrecipitation = 0;
     var averageWindSpeed = 0;
 
     for (let i = 0; i < 96; i++) {
-      switch (dataPoints[i].type) {
+      switch (data[i].type) {
         case "temperature":
-          if (dataPoints[i].value > maxTemp) maxTemp = dataPoints[i].value;
-          if (dataPoints[i].value < minTemp) minTemp = dataPoints[i].value;
+          if (data[i].value > maxTemp) maxTemp = data[i].value;
+          if (data[i].value < minTemp) minTemp = data[i].value;
           break;
         case "precipitation":
-          totalPrecipitation += dataPoints[i].value;
+          totalPrecipitation += data[i].value;
           break;
         case "wind speed":
-          averageWindSpeed += dataPoints[i].value;
+          averageWindSpeed += data[i].value;
         default:
       }
     }
@@ -163,4 +174,81 @@ const getHistoricData = (city) => {
     console.log("Something went wrong");
   };
   xhr.send();
+};
+
+// Fetch Methods
+
+const async get24hForecastFetch = (city) => {
+  const response = await fetch(`http://localhost:8080/forecast/${city}`);
+  var data = await response.json();
+  
+  //console.log(data);
+  //if (response) {
+  //  hideloader();
+  //} show(data);
+
+  const makeTable = data =>
+    document.getElementById("tbody").innerHTML = data.map(
+      item => `<tr><td>${item.time}</td><td>${item.type}</td><td>${item.from}</td><td>${item.to}</td><td>${item.unit}</td></tr>`
+    ).join("");
+
+  makeTable(JSON.parse(data));
+};
+
+const async getLastMeasurementSetFetch = (city) => {
+  const response = await fetch(`http://localhost:8080/forecast/${city}`);
+  var data = await response.json();
+
+  const l = data.length;
+  for (let i = 0; i < 4; i++) {
+    switch (data[l - i - 1].type) {
+      case "temperature":
+        var textArea = document.getElementById("lastTempMeasurementTextArea");
+        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+        break;
+      case "precipitation":
+        var textArea = document.getElementById("lastPrecipitationMeasurementTextArea");
+        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+        break;
+      case "wind speed":
+        var textArea = document.getElementById("lastWindMeasurementTextArea");
+        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+      case "cloud coverage":
+        var textArea = document.getElementById("lastCloudMeasurementTextArea");
+        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+      default:
+        break;
+    }
+  }
+};
+
+const async getHistoricDataFetch = (city) => {
+  const response = await fetch(`http://localhost:8080/forecast/${city}`);
+  var data = await response.json();
+
+  var maxTemp = data[0].value;
+  var minTemp = data[0].value;
+  var totalPrecipitation = 0;
+  var averageWindSpeed = 0;
+
+  for (let i = 0; i < 96; i++) {
+    switch (data[i].type) {
+      case "temperature":
+        if (data[i].value > maxTemp) maxTemp = data[i].value;
+        if (data[i].value < minTemp) minTemp = data[i].value;
+        break;
+      case "precipitation":
+        totalPrecipitation += data[i].value;
+        break;
+      case "wind speed":
+        averageWindSpeed += data[i].value;
+      default:
+    }
+  }
+
+  document.getElementById("maxTempSpan").innerHTML = `${maxTemp} °C`;
+  document.getElementById("minTempSpan").innerHTML = `${minTemp} °C`;
+  document.getElementById("totalPrecipitationSpan").innerHTML = `${totalPrecipitation} mm`;
+  averageWindSpeed /= 24;
+  document.getElementById("averageWindSpeed").innerHTML = `${averageWindSpeed.toFixed(3)} m/s`;
 };

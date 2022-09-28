@@ -72,13 +72,10 @@ const update = () => {
       getHistoricData(selectedCity);
     case "fetch":
       console.log("Using Fetch!");
-      await get24hForecastFetch(selectedCity);
-      await getLastMeasurementSetFetch(selectedCity);
-      await getHistoricDataFetch(selectedCity);
+      get24hForecastFetch(selectedCity);
+      getLastMeasurementSetFetch(selectedCity);
+      getHistoricDataFetch(selectedCity);
   }
-  
-
-
 };
 
 
@@ -178,7 +175,7 @@ const getHistoricData = (city) => {
 
 // Fetch Methods
 
-const async get24hForecastFetch = (city) => {
+const get24hForecastFetch = (city) => {
   const response = await fetch(`http://localhost:8080/forecast/${city}`);
   var data = await response.json();
   
@@ -195,7 +192,7 @@ const async get24hForecastFetch = (city) => {
   makeTable(JSON.parse(data));
 };
 
-const async getLastMeasurementSetFetch = (city) => {
+const getLastMeasurementSetFetch = (city) => {
   const response = await fetch(`http://localhost:8080/forecast/${city}`);
   var data = await response.json();
 
@@ -222,7 +219,7 @@ const async getLastMeasurementSetFetch = (city) => {
   }
 };
 
-const async getHistoricDataFetch = (city) => {
+const getHistoricDataFetch = (city) => {
   const response = await fetch(`http://localhost:8080/forecast/${city}`);
   var data = await response.json();
 

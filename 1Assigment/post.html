@@ -6,19 +6,20 @@
   </head>
   <body>
     <div class="post">
-    <h1>Send your forecast data to the server!</h1>
-    <textarea id="inputText" cols="25" rows="8">
-      {
-        "value": -,
-        "type": "-",
-        "unit": "-",
-        "time": "-",
-        "place": "-"
-      }
-    </textarea>
-    <br />
-    <button onclick="post()">Send</button>
-    <button><a href="index.html">Go back</a></button>
-</div>
+      <h1>Send your forecast data to the server!</h1>
+      <textarea id="inputText" cols="25" rows="8">
+        {
+          "value": -,
+          "type": "-",
+          "unit": "-",
+          "time": "-",
+          "place": "-"
+        }
+      </textarea>
+      <br />
+      <button onclick="post()">Send (XMLHttp)</button>
+      <button onclick="postFetch()">Send (Fetch)</button>
+      <button><a href="index.html">Go back</a></button>
+    </div>
   </body>
 </html>

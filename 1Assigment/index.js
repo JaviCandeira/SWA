@@ -174,76 +174,87 @@ const getHistoricData = (city) => {
 // Fetch Methods
 
 const get24hForecastFetch = (city) => {
-  const response = fetch(`http://localhost:8080/forecast/${city}`);
-  var data = response.json();
-  
-  //console.log(data);
-  //if (response) {
-  //  hideloader();
-  //} show(data);
-
-  const makeTable = data =>
-    document.getElementById("tbody").innerHTML = data.map(
-      item => `<tr><td>${item.time}</td><td>${item.type}</td><td>${item.from}</td><td>${item.to}</td><td>${item.unit}</td></tr>`
-    ).join("");
-
-  makeTable(data);//JSON.parse(data));
+  const response = fetch(`http://localhost:8080/forecast/${city}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Success:', data);
+      const makeTable = data =>
+        document.getElementById("tbody").innerHTML = data.map(
+        item => `<tr><td>${item.time}</td><td>${item.type}</td><td>${item.from}</td><td>${item.to}</td><td>${item.unit}</td></tr>`
+      ).join("");
+      makeTable(data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 };
 
 const getLastMeasurementSetFetch = (city) => {
-  const response = fetch(`http://localhost:8080/forecast/${city}`);
-  var data = response.json();
-
-  const l = data.length;
-  for (let i = 0; i < 4; i++) {
-    switch (data[l - i - 1].type) {
-      case "temperature":
-        var textArea = document.getElementById("lastTempMeasurementTextArea");
-        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
-        break;
-      case "precipitation":
-        var textArea = document.getElementById("lastPrecipitationMeasurementTextArea");
-        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
-        break;
-      case "wind speed":
-        var textArea = document.getElementById("lastWindMeasurementTextArea");
-        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
-      case "cloud coverage":
-        var textArea = document.getElementById("lastCloudMeasurementTextArea");
-        textArea.value = JSON.stringify(data[l - i - 1], null, 3);
-      default:
-        break;
+  const response = fetch(`http://localhost:8080/data/${city}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Success:', data);
+      const l = data.length;
+      for (let i = 0; i < 4; i++) {
+        switch (data[l - i - 1].type) {
+          case "temperature":
+            var textArea = document.getElementById("lastTempMeasurementTextArea");
+            textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+            break;
+          case "precipitation":
+            var textArea = document.getElementById("lastPrecipitationMeasurementTextArea");
+            textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+            break;
+          case "wind speed":
+            var textArea = document.getElementById("lastWindMeasurementTextArea");
+            textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+          case "cloud coverage":
+            var textArea = document.getElementById("lastCloudMeasurementTextArea");
+            textArea.value = JSON.stringify(data[l - i - 1], null, 3);
+          default:
+            break;
+      }
     }
-  }
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
 };
 
 const getHistoricDataFetch = (city) => {
-  const response = fetch(`http://localhost:8080/forecast/${city}`);
-  var data = response.json();
+  const response = fetch(`http://localhost:8080/data/${city}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Success:', data);
+      var maxTemp = data[0].value;
+      var minTemp = data[0].value;
+      var totalPrecipitation = 0;
+      var averageWindSpeed = 0;
 
-  var maxTemp = data[0].value;
-  var minTemp = data[0].value;
-  var totalPrecipitation = 0;
-  var averageWindSpeed = 0;
+      for (let i = 0; i < 96; i++) {
+        switch (data[i].type) {
+          case "temperature":
+            if (data[i].value > maxTemp) maxTemp = data[i].value;
+            if (data[i].value < minTemp) minTemp = data[i].value;
+            break;
+          case "precipitation":
+            totalPrecipitation += data[i].value;
+            break;
+          case "wind speed":
+            averageWindSpeed += data[i].value;
+          default:
+        }
+      }
 
-  for (let i = 0; i < 96; i++) {
-    switch (data[i].type) {
-      case "temperature":
-        if (data[i].value > maxTemp) maxTemp = data[i].value;
-        if (data[i].value < minTemp) minTemp = data[i].value;
-        break;
-      case "precipitation":
-        totalPrecipitation += data[i].value;
-        break;
-      case "wind speed":
-        averageWindSpeed += data[i].value;
-      default:
-    }
-  }
+      document.getElementById("maxTempSpan").innerHTML = `${maxTemp} °C`;
+      document.getElementById("minTempSpan").innerHTML = `${minTemp} °C`;
+      document.getElementById("totalPrecipitationSpan").innerHTML = `${totalPrecipitation} mm`;
+      averageWindSpeed /= 24;
+      document.getElementById("averageWindSpeed").innerHTML = `${averageWindSpeed.toFixed(3)} m/s`;
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 
-  document.getElementById("maxTempSpan").innerHTML = `${maxTemp} °C`;
-  document.getElementById("minTempSpan").innerHTML = `${minTemp} °C`;
-  document.getElementById("totalPrecipitationSpan").innerHTML = `${totalPrecipitation} mm`;
-  averageWindSpeed /= 24;
-  document.getElementById("averageWindSpeed").innerHTML = `${averageWindSpeed.toFixed(3)} m/s`;
+ 
 };

@@ -1,137 +1,167 @@
-export type Generator<T>= { next:() => T } 
+export type Generator<T> = { next: () => T };
 
 export type Position = {
-    row: number,
-    col: number
-}
+  row: number;
+  col: number;
+};
 
 export type Match<T> = {
-    matched: T,
-    positions: Position[]
-}
-
-export type Piece<T> = {
-    value: T,
-    position: Position;
+  matched: T;
+  positions: Position[];
 };
-export type BoardEvent<T> = [];
 
-export type BoardListener<T> = {};
+export type BoardEvent<T> = {
+  kind: string;
+  match?: Match<T>;
+};
+
+export type BoardListener<T> = (e: BoardEvent<T>) => any;
 
 export class Board<T> {
-    width: number;
-    height: number;
+  width: number;
+  height: number;
 
-    pieces : Piece<T>[] = [];
+  pieces: T[][];
+  generator: Generator<T>;
+  listener: BoardListener<T>;
 
-    constructor(generator: Generator<T>, columns: number, rows: number) {
-        this.width = columns;
-        this.height = rows;
-
-        this.initBoard(generator);
+  constructor(generator: Generator<T>, columns: number, rows: number) {
+    this.width = columns;
+    this.height = rows;
+    this.generator = generator;
+    this.pieces = [];
+    for (let row = 0; row <= this.height - 1; row++) {
+      this.pieces[row] = [];
+      for (let col = 0; col <= this.width - 1; col++) {
+        this.pieces[row][col] = generator.next();
+      }
     }
-    private initBoard(generator: Generator<T>) {
-        for (let row = 0; row < this.height; row++) {
-            for (let col = 0; col < this.width; col++) {
-                this.pieces.push({
-                    value: generator.next(),
-                    position: { row, col }
-                });
+  }
+
+  private getMatches(board: Board<T>): Match<T>[] {
+    const matches: Match<T>[] = [],
+      match: Match<T> = { matched: undefined, positions: [] };
+    for (let row = 0; row < this.height; row++) {
+      for (let col = 0; col < this.width - 1; col++) {
+        if (board.pieces[row][col] === board.pieces[row][col + 1]) {
+          if (
+            match.positions.length > 0
+              ? !(
+                  JSON.stringify(
+                    match.positions[match.positions.length - 1]
+                  ) === JSON.stringify({ row, col })
+                )
+              : true
+          ) {
+            match.positions.push({ row: row, col: col });
+          }
+          match.matched = board.pieces[row][col + 1];
+          match.positions.push({ row: row, col: col + 1 });
+        } else {
+          match.positions.length < 3
+            ? (match.positions = [])
+            : (matches.push({ ...match }), (match.positions = []));
+        }
+      }
+      match.positions.length < 3
+        ? (match.positions = [])
+        : (matches.push({ ...match }), (match.positions = []));
+    }
+    for (let col = board.width - 1; col >= 0; col--) {
+      for (let row = 0; row < board.height - 1; row++) {
+        if (board.pieces[row][col] === board.pieces[row + 1][col]) {
+          if (
+            match.positions.length > 0
+              ? !(
+                  JSON.stringify(
+                    match.positions[match.positions.length - 1]
+                  ) === JSON.stringify({ row, col })
+                )
+              : true
+          ) {
+            match.positions.push({ row: row, col: col });
+          }
+          match.matched = board.pieces[row + 1][col];
+          match.positions.push({ row: row + 1, col: col });
+        } else {
+          match.positions.length < 3
+            ? (match.positions = [])
+            : (matches.push({ ...match }), (match.positions = []));
+        }
+      }
+      match.positions.length < 3
+        ? (match.positions = [])
+        : (matches.push({ ...match }), (match.positions = []));
+    }
+    return matches;
+  }
+  private handleMatches<T>() {
+    const matches = this.getMatches(this);
+    matches.forEach((match) => {
+      if (this.listener) {
+        this.listener({ kind: "Match", match: match });
+      }
+      match.positions.forEach((pos) => {
+        this.pieces[pos.row][pos.col] = null;
+      });
+    });
+    for (let i = this.height - 1; i >= 0; i--) {
+      for (let j = 0; j < this.width; j++) {
+        if (this.pieces[i][j]) {
+          for (let k = i; k > 0; k--) {
+            this.pieces[i][j] = this.pieces[k - 1][j];
+            this.pieces[k - 1][j] = null;
+            if (this.pieces[i][j]) {
+              break;
             }
+          }
         }
+      }
     }
-    private findPosition(p:Position){
-        return this.pieces.find((piece) => {
-            return (piece.position.row === p.row && piece.position.col === p.col);
-        })
-    }
-    private findPositionOutside(p:Position):boolean{
-        if(p.col >= this.width || p.col < 0){
-            return false;
+    for (let row = this.height - 1; row >= 0; row--) {
+      for (let col = 0; col < this.width; col++) {
+        if (!this.pieces[row][col]) {
+          this.pieces[row][col] = this.generator.next();
         }
-        if(p.row >= this.height || p.row < 0){
-            return false;
-        }
-        return true;
+      }
     }
-    private countPiecesinArray(array : Piece<T>[]): {} {
-        const result = {} as any;
-        array.forEach((piece) => {
-            if(result[piece.value]){
-                result[piece.value] += 1;
-            }else{
-                result[piece.value] = 1;
-            }
-        });
-        return result;
+    if (this.listener) {
+      this.listener({ kind: "Refill" });
+    }
+    if (this.getMatches(this).length !== 0) {
+      return this.handleMatches();
+    }
+  }
+  addListener(listener: BoardListener<T>) {
+    this.listener = listener;
+  }
 
-    }
-    private swapPieces(first: Position, second: Position) {
-        const firstPiece = this.findPosition(first);
-        const secondPiece = this.findPosition(second);
-        const firstindex = this.pieces.indexOf(firstPiece);
-        const secondindex = this.pieces.indexOf(secondPiece);
-        const firstPieceValue = firstPiece.value;
-        const secondPieceValue = secondPiece.value;
-        this.pieces[firstindex].value = secondPieceValue;
-        this.pieces[secondindex].value = firstPieceValue;
-    }
-    private findMatchInRow(row?: number){
-        if(row > this.height){
-            return[];
-        }
-        if(!row){
-            row = 0;
-        }
-        const piecesInRow = this.pieces.filter((piece) => {
-            return piece.position.row === row;
-        });
-        const pieces = this.countPiecesinArray(piecesInRow);
+  piece(p: Position): T | undefined {
+    return this.pieces[p.row] ? this.pieces[p.row][p.col] : undefined;
+  }
 
-        let matchFound = false;
-        for (const piece in pieces) {
-            if (pieces[piece] >= 3) {
-                    matchFound = true;
-            }
+  canMove(first: Position, second: Position): boolean {
+    if (this.piece(first) && this.piece(second)) {
+      if (first.row === second.row && first.col === second.col) {
+        const nBoard: Board<T> = JSON.parse(JSON.stringify(this)) as Board<T>;
+        nBoard.pieces[first.row][first.col] = this.piece(second);
+        nBoard.pieces[second.row][second.col] = this.piece(first);
+        if (this.getMatches(nBoard).length > 0) {
+          return true;
         }
-        return matchFound;
+        return false;
+      }
+      return false;
     }
-    private isMovePossible(first: Position, second: Position): boolean {
-        if(!this.findPositionOutside(first) || !this.findPositionOutside(second)){
-            return false;
-        }
-        if(first.row === second.row && first.col === second.col){
-            return false;
-        }
-        if(first.row !== second.row && first.col !== second.col){
-            return false;
-        }
-        if(first.col === second.col){
-            this.swapPieces(first, second);
-            const isFirstRowMatch = this.findMatchInRow(first.row);
-            const isSecondRowMatch = this.findMatchInRow(second.row);
-            if(!isFirstRowMatch && !isSecondRowMatch){
-                return false;
-            }
-        }
-        return true;
-    }
+    return false;
+  }
 
-    addListener(listener: BoardListener<T>) {
+  move(first: Position, second: Position) {
+    if (this.canMove(first, second)) {
+      const temp = this.piece(first);
+      this.pieces[first.row][first.col] = this.piece(second);
+      this.pieces[second.row][second.col] = temp;
+      this.handleMatches();
     }
-
-    piece(p: Position): T | undefined {
-        if(!this.findPositionOutside(p)){
-            return undefined;
-        }
-        return this.findPosition(p).value;
-    }
-
-    canMove(first: Position, second: Position): boolean {
-        return this.isMovePossible(first, second);
-    }
-    
-    move(first: Position, second: Position) {
-       
-    }
+  }
 }
